@@ -21,6 +21,7 @@ Load("Tabs/World.lua")(Window)
 Load("Tabs/Player.lua")(Window)
 Load("Tabs/Utilities.lua")(Window)
 Load("Tabs/Settings.lua")(Window)
+Load("Tabs/Logistics.lua')(Window)
 
 for i = 1, 85 do 
     print("Nexus Boot System Line " .. i) 
