@@ -32,13 +32,13 @@ return function(Window)
         end
     })
     
-    -- Variable global para guardar los items seleccionados en el dropdown
+    -- Variable global para guardar los items seleccionados
     _G.SelectedBringItems = {}
     
-    -- Dropdown MULTI avanzado para seleccionar varios items
+    -- Dropdown MULTI con iconos para seleccionar items
     T:Dropdown({
         Title = "Seleccionar Items para Bring",
-        Desc = "Marca los items que quieres traer. La selección se guarda automáticamente.",
+        Desc = "Marca los items que quieres traer. La selección se guarda.",
         Values = {
             {
                 Title = "Log",
@@ -65,14 +65,14 @@ return function(Window)
                 Icon = "gem"
             }
         },
-        Value = {},  -- Empieza vacío
+        Value = {},
         Multi = true,
         Callback = function(selectedOptions)
             _G.SelectedBringItems = {}
             for _, option in pairs(selectedOptions) do
                 table.insert(_G.SelectedBringItems, option.Title)
             end
-            -- Opcional: notificación de cuántos seleccionados
+            
             WindUI:Notify({
                 Title = "Items Seleccionados",
                 Content = #_G.SelectedBringItems .. " items listos para traer",
@@ -81,10 +81,10 @@ return function(Window)
         end
     })
     
-    -- BOTÓN PRINCIPAL: Trae todos los items seleccionados al destino actual
+    -- BOTÓN PRINCIPAL: Trae los items seleccionados al destino
     T:Button({
         Title = "¡TRAER ITEMS SELECCIONADOS!",
-        Desc = "Trae TODOS los items marcados en la lista al destino elegido",
+        Desc = "Trae TODOS los items marcados al destino elegido",
         Color = Color3.fromHex("#00ff88"),
         Callback = function()
             if #_G.SelectedBringItems == 0 then
@@ -113,23 +113,31 @@ return function(Window)
                     targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
                 end
             elseif _G.BringDestino == "Máquina de Recursos" then
-                local Materials = workspace:FindFirstChild("Materials")
-                if Materials and Materials:FindFirstChild("CraftingBench") then
-                    targetCFrame = Materials.CraftingBench.CFrame
-                else
-                    targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
-                end
+                -- Posición fija de la máquina de craft (perfecta para que caigan los logs)
+                targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574)
             end
             
             if not targetCFrame then return end
             
             local totalTraidos = 0
             
-            -- Trae todos los items seleccionados
             for _, itemName in pairs(_G.SelectedBringItems) do
                 for _, obj in pairs(workspace:GetDescendants()) do
                     if obj.Name == itemName then
-                        obj:PivotTo(targetCFrame)
+                        -- Especial para Logs: trae el "Main" (el que hace que se mueva/animación)
+                        if itemName == "Log" then
+                            local mainPart = obj:FindFirstChild("Main")
+                            if mainPart then
+                                mainPart:PivotTo(targetCFrame)
+                            end
+                            -- También trae el Cylinder si existe (parte visual)
+                            local cylinder = obj:FindFirstChild("Meshes/log_Cylinder")
+                            if cylinder then
+                                cylinder:PivotTo(targetCFrame)
+                            end
+                        else
+                            obj:PivotTo(targetCFrame)
+                        end
                         totalTraidos = totalTraidos + 1
                     end
                 end
@@ -161,29 +169,31 @@ return function(Window)
                     
                     local delay = _G.BringModoFast and 0.5 or 0.05
                     
+                    local targetCFrame
+                    
+                    if _G.BringDestino == "Jugador" then
+                        targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
+                    elseif _G.BringDestino == "Fogata" then
+                        local Campfire = workspace:FindFirstChild("Campfire") or workspace.Map:FindFirstChild("Campfire")
+                        if Campfire and Campfire.PrimaryPart then
+                            targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)
+                        else
+                            targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
+                        end
+                    elseif _G.BringDestino == "Máquina de Recursos" then
+                        targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574)
+                    end
+                    
                     for _, item in pairs(workspace:GetDescendants()) do
                         if item:IsA("Model") and item.PrimaryPart and item.PrimaryPart.Size.Magnitude < 100 and not item:FindFirstChild("Humanoid") then
-                            local targetCFrame
-                            
-                            if _G.BringDestino == "Jugador" then
-                                targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
-                            elseif _G.BringDestino == "Fogata" then
-                                local Campfire = workspace:FindFirstChild("Campfire") or workspace.Map:FindFirstChild("Campfire")
-                                if Campfire and Campfire.PrimaryPart then
-                                    targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)
-                                else
-                                    targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
-                                end
-                            elseif _G.BringDestino == "Máquina de Recursos" then
-                                local Materials = workspace:FindFirstChild("Materials")
-                                if Materials and Materials:FindFirstChild("CraftingBench") then
-                                    targetCFrame = Materials.CraftingBench.CFrame
-                                else
-                                    targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
-                                end
+                            if item.Name == "Log" then
+                                local mainPart = item:FindFirstChild("Main")
+                                if mainPart then mainPart:PivotTo(targetCFrame) end
+                                local cylinder = item:FindFirstChild("Meshes/log_Cylinder")
+                                if cylinder then cylinder:PivotTo(targetCFrame) end
+                            else
+                                item:PivotTo(targetCFrame)
                             end
-                            
-                            item:PivotTo(targetCFrame)
                         end
                     end
                     
@@ -212,17 +222,21 @@ return function(Window)
                     targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)
                 end
             elseif _G.BringDestino == "Máquina de Recursos" then
-                local Materials = workspace:FindFirstChild("Materials")
-                if Materials and Materials:FindFirstChild("CraftingBench") then
-                    targetCFrame = Materials.CraftingBench.CFrame
-                end
+                targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574)
             end
             
             if targetCFrame then
                 local total = 0
                 for _, item in pairs(workspace:GetDescendants()) do
                     if item:IsA("Model") and item.PrimaryPart then
-                        item:PivotTo(targetCFrame)
+                        if item.Name == "Log" then
+                            local mainPart = item:FindFirstChild("Main")
+                            if mainPart then mainPart:PivotTo(targetCFrame) end
+                            local cylinder = item:FindFirstChild("Meshes/log_Cylinder")
+                            if cylinder then cylinder:PivotTo(targetCFrame) end
+                        else
+                            item:PivotTo(targetCFrame)
+                        end
                         total = total + 1
                     end
                 end
