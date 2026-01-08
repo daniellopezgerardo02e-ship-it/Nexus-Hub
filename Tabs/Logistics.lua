@@ -6,7 +6,7 @@ return function(Window)
     
     T:Section({ Title = "Configuración de Bring" })
     
-    -- Dropdown corregido para destino (con Values y sin Multi)
+    -- Dropdown para elegir destino del bring
     T:Dropdown({
         Title = "Destino del Bring",
         Desc = "Elige a dónde quieres que vayan los items",
@@ -15,7 +15,7 @@ return function(Window)
             "Fogata",
             "Máquina de Recursos"
         },
-        Value = "Jugador",  -- Valor por defecto
+        Value = "Jugador",
         Multi = false,
         Callback = function(selected)
             _G.BringDestino = selected
@@ -32,10 +32,13 @@ return function(Window)
         end
     })
     
-    -- Dropdown MULTI avanzado para seleccionar varios items a la vez
+    -- Variable global para guardar los items seleccionados en el dropdown
+    _G.SelectedBringItems = {}
+    
+    -- Dropdown MULTI avanzado para seleccionar varios items
     T:Dropdown({
-        Title = "Traer Items Específicos",
-        Desc = "Selecciona uno o varios items. Al cambiar la selección, se traen automáticamente al destino",
+        Title = "Seleccionar Items para Bring",
+        Desc = "Marca los items que quieres traer. La selección se guarda automáticamente.",
         Values = {
             {
                 Title = "Log",
@@ -63,8 +66,36 @@ return function(Window)
             }
         },
         Value = {},  -- Empieza vacío
-        Multi = true,  -- ¡Permite seleccionar varios!
+        Multi = true,
         Callback = function(selectedOptions)
+            _G.SelectedBringItems = {}
+            for _, option in pairs(selectedOptions) do
+                table.insert(_G.SelectedBringItems, option.Title)
+            end
+            -- Opcional: notificación de cuántos seleccionados
+            WindUI:Notify({
+                Title = "Items Seleccionados",
+                Content = #_G.SelectedBringItems .. " items listos para traer",
+                Duration = 2
+            })
+        end
+    })
+    
+    -- BOTÓN PRINCIPAL: Trae todos los items seleccionados al destino actual
+    T:Button({
+        Title = "¡TRAER ITEMS SELECCIONADOS!",
+        Desc = "Trae TODOS los items marcados en la lista al destino elegido",
+        Color = Color3.fromHex("#00ff88"),
+        Callback = function()
+            if #_G.SelectedBringItems == 0 then
+                WindUI:Notify({
+                    Title = "Error",
+                    Content = "No has seleccionado ningún item",
+                    Duration = 3
+                })
+                return
+            end
+            
             local Char = game.Players.LocalPlayer.Character
             if not Char then return end
             local HRP = Char:FindFirstChild("HumanoidRootPart")
@@ -77,7 +108,7 @@ return function(Window)
             elseif _G.BringDestino == "Fogata" then
                 local Campfire = workspace:FindFirstChild("Campfire") or workspace.Map:FindFirstChild("Campfire")
                 if Campfire and Campfire.PrimaryPart then
-                    targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)  -- Perfecto para quemar logs
+                    targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)
                 else
                     targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
                 end
@@ -92,15 +123,23 @@ return function(Window)
             
             if not targetCFrame then return end
             
-            -- Trae TODOS los items seleccionados
-            for _, option in pairs(selectedOptions) do
-                local itemName = option.Title
+            local totalTraidos = 0
+            
+            -- Trae todos los items seleccionados
+            for _, itemName in pairs(_G.SelectedBringItems) do
                 for _, obj in pairs(workspace:GetDescendants()) do
                     if obj.Name == itemName then
                         obj:PivotTo(targetCFrame)
+                        totalTraidos = totalTraidos + 1
                     end
                 end
             end
+            
+            WindUI:Notify({
+                Title = "Bring Completado",
+                Content = "Traídos " .. totalTraidos .. " items al destino: " .. _G.BringDestino,
+                Duration = 4
+            })
         end
     })
     
@@ -180,11 +219,18 @@ return function(Window)
             end
             
             if targetCFrame then
+                local total = 0
                 for _, item in pairs(workspace:GetDescendants()) do
                     if item:IsA("Model") and item.PrimaryPart then
                         item:PivotTo(targetCFrame)
+                        total = total + 1
                     end
                 end
+                WindUI:Notify({
+                    Title = "Bring Total",
+                    Content = "Traídos " .. total .. " items",
+                    Duration = 4
+                })
             end
         end
     })
