@@ -1,24 +1,31 @@
 local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
 local function Load(path)
-    local s, c = pcall(function() return game:HttpGet(Base .. path) end)
-    if not s or not c then warn("Nexus: Error descarga " .. path) return nil end
+    local s, c = pcall(function() 
+        return game:HttpGet(Base .. path) 
+    end)
     
-    local f, err = loadstring(c)
-    if not f then warn("Nexus: Error sintaxis en " .. path .. " -> " .. err) return nil end
-    
-    local ok, res = pcall(f)
-    if not ok then warn("Nexus: Error ejecucion en " .. path .. " -> " .. res) return nil end
-    
-    return res
+    if s and c then
+        local f, err = loadstring(c)
+        if f then 
+            return f() 
+        else 
+            warn("Error de sintaxis en: " .. path .. " | " .. tostring(err))
+        end
+    else
+        warn("No se pudo cargar el archivo (Ruta incorrecta?): " .. path)
+    end
+    return nil
 end
 
--- Ejecucion de la ventana
+-- CARGA DEL ARCHIVO CORRECTO (Window.lua sin S)
 local WindowFunc = Load("Core/Window.lua")
 local Window = nil
 
 if type(WindowFunc) == "function" then
     Window = WindowFunc()
+else
+    warn("Error: Core/Window.lua no retorno una funcion")
 end
 
 if Window then
@@ -33,13 +40,19 @@ if Window then
     }
     
     for _, t in pairs(tabs) do
-        local tabFunc = Load(t)
-        if type(tabFunc) == "function" then
-            pcall(function() tabFunc(Window) end)
+        local tFunc = Load(t)
+        if type(tFunc) == "function" then
+            pcall(function() 
+                tFunc(Window) 
+            end)
         end
     end
+    
+    print("Nexus Hub: Sistema cargado correctamente con Window.lua")
 else
-    warn("Nexus: No se pudo capturar el objeto Window de Core/Windows.lua")
+    warn("Error critico: No se pudo crear la interfaz.")
 end
 
-for i = 1, 80 do print("Nexus_Final_Check_" .. i) end
+for i = 1, 100 do 
+    print("Nexus_Boot_Check_Line_" .. i) 
+end
