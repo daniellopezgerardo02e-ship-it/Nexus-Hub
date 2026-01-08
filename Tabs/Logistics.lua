@@ -4,60 +4,74 @@ return function(Window)
         Icon = "package"
     })
     
-    T:Section({ Title = "Configuración Bring" })
+    T:Section({ Title = "Configuración de Bring" })
     
-    -- Dropdown para destino
+    -- Dropdown para elegir destino del bring
     T:Dropdown({
-        Title = "Destino Bring",
-        Values = {"Player", "Campfire", "Resource Machine"},
+        Title = "Destino del Bring",
+        Values = {"Jugador", "Fogata", "Máquina de Recursos"},
         Multi = false,
-        Default = "Player",
+        Default = "Jugador",
         Callback = function(v)
-            _G.BringDest = v
+            _G.BringDestino = v
         end
     })
     
-    -- Toggle para modo
+    -- Toggle para modo Fast vs Instant
     T:Toggle({
         Title = "Modo Fast (1x1)",
-        Desc = "Trae uno por uno (lento, anti-lag). OFF = Instant (todos)",
+        Desc = "ON = trae uno por uno (anti-lag). OFF = Instant (todos de una)",
         Value = true,
         Callback = function(v)
-            _G.BringFast = v
+            _G.BringModoFast = v
         end
     })
     
-    T:Section({ Title = "Auto Bring" })
+    T:Section({ Title = "Bring Automático" })
     
     T:Toggle({
-        Title = "Auto Bring Items",
-        Desc = "Trae items auto según config",
+        Title = "Auto Bring Activo",
+        Desc = "Trae automáticamente todos los items según configuración",
         Value = false,
         Callback = function(v)
-            _G.BringAuto = v
+            _G.AutoBringActivo = v
+            
             task.spawn(function()
-                while _G.BringAuto do
+                while _G.AutoBringActivo do
                     local Char = game.Players.LocalPlayer.Character
+                    if not Char then task.wait(0.5) continue end
                     local HRP = Char:FindFirstChild("HumanoidRootPart")
-                    if HRP then
-                        local delay = _G.BringFast and 0.5 or 0.05  -- Fast: lento, Instant: rápido
-                        for _, item in pairs(workspace:GetDescendants()) do
-                            if item:IsA("Model") and item.PrimaryPart and item.Size.Magnitude < 100 and not item:FindFirstChild("Humanoid") then
-                                local destPos
-                                if _G.BringDest == "Player" then
-                                    destPos = HRP.CFrame * CFrame.new(0, 0, -5)
-                                elseif _G.BringDest == "Campfire" then
-                                    local Campfire = workspace:FindFirstChild("Campfire")
-                                    destPos = Campfire.PrimaryPart.CFrame if Campfire else HRP.CFrame
-                                elseif _G.BringDest == "Resource Machine" then
-                                    local Materials = workspace:FindFirstChild("Materials")
-                                    destPos = Materials.CraftingBench.CFrame if Materials and Materials:FindFirstChild("CraftingBench") else HRP.CFrame
+                    if not HRP then task.wait(0.5) continue end
+                    
+                    local delay = _G.BringModoFast and 0.5 or 0.05  -- Fast lento, Instant rápido
+                    
+                    for _, item in pairs(workspace:GetDescendants()) do
+                        if item:IsA("Model") and item.PrimaryPart and item.PrimaryPart.Size.Magnitude < 100 and not item:FindFirstChild("Humanoid") then
+                            local targetCFrame
+                            
+                            if _G.BringDestino == "Jugador" then
+                                targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
+                            elseif _G.BringDestino == "Fogata" then
+                                local Campfire = workspace:FindFirstChild("Campfire") or workspace.Map:FindFirstChild("Campfire")
+                                if Campfire and Campfire.PrimaryPart then
+                                    targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)  -- Posición perfecta arriba de la fogata
+                                else
+                                    targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)  -- Fallback al jugador
                                 end
-                                item:PivotTo(destPos)
+                            elseif _G.BringDestino == "Máquina de Recursos" then
+                                local Materials = workspace:FindFirstChild("Materials")
+                                if Materials and Materials:FindFirstChild("CraftingBench") then
+                                    targetCFrame = Materials.CraftingBench.CFrame
+                                else
+                                    targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
+                                end
                             end
+                            
+                            item:PivotTo(targetCFrame)
                         end
-                        task.wait(delay)
                     end
+                    
+                    task.wait(delay)
                 end
             end)
         end
@@ -65,101 +79,104 @@ return function(Window)
     
     T:Section({ Title = "Bring Específico (Lista)" })
     
-    T:Button({
-        Title = "Log",
-        Callback = function()
-            local HRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name == "Log" then
-                    local destPos = getDestPos(HRP)  -- Función helper abajo
-                    obj:PivotTo(destPos)
-                end
+    local function bringItem(name)
+        local Char = game.Players.LocalPlayer.Character
+        if not Char then return end
+        local HRP = Char:FindFirstChild("HumanoidRootPart")
+        if not HRP then return end
+        
+        local targetCFrame
+        
+        if _G.BringDestino == "Jugador" then
+            targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
+        elseif _G.BringDestino == "Fogata" then
+            local Campfire = workspace:FindFirstChild("Campfire") or workspace.Map:FindFirstChild("Campfire")
+            if Campfire and Campfire.PrimaryPart then
+                targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)
+            else
+                targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
+            end
+        elseif _G.BringDestino == "Máquina de Recursos" then
+            local Materials = workspace:FindFirstChild("Materials")
+            if Materials and Materials:FindFirstChild("CraftingBench") then
+                targetCFrame = Materials.CraftingBench.CFrame
+            else
+                targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
             end
         end
+        
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj.Name == name then
+                obj:PivotTo(targetCFrame)
+            end
+        end
+    end
+    
+    T:Button({
+        Title = "Log",
+        Callback = function() bringItem("Log") end
     })
     
     T:Button({
         Title = "Screw",
-        Callback = function()
-            local HRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name == "Screw" then
-                    local destPos = getDestPos(HRP)
-                    obj:PivotTo(destPos)
-                end
-            end
-        end
+        Callback = function() bringItem("Screw") end
     })
     
     T:Button({
         Title = "Nail",
-        Callback = function()
-            local HRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name == "Nail" then
-                    local destPos = getDestPos(HRP)
-                    obj:PivotTo(destPos)
-                end
-            end
-        end
+        Callback = function() bringItem("Nail") end
     })
     
     T:Button({
         Title = "Coin",
-        Callback = function()
-            local HRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name == "Coin" then
-                    local destPos = getDestPos(HRP)
-                    obj:PivotTo(destPos)
-                end
-            end
-        end
+        Callback = function() bringItem("Coin") end
     })
     
     T:Button({
         Title = "Flower",
-        Callback = function()
-            local HRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name == "Flower" then
-                    local destPos = getDestPos(HRP)
-                    obj:PivotTo(destPos)
-                end
-            end
-        end
+        Callback = function() bringItem("Flower") end
     })
     
     T:Button({
         Title = "Diamond",
+        Callback = function() bringItem("Diamond") end
+    })
+    
+    T:Button({
+        Title = "Traer TODO (Instant)",
+        Desc = "Ignora modo y trae absolutamente todo al destino actual",
         Callback = function()
-            local HRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-            for _, obj in pairs(workspace:GetDescendants()) do
-                if obj.Name == "Diamond" then
-                    local destPos = getDestPos(HRP)
-                    obj:PivotTo(destPos)
+            local Char = game.Players.LocalPlayer.Character
+            if not Char then return end
+            local HRP = Char:FindFirstChild("HumanoidRootPart")
+            if not HRP then return end
+            
+            local targetCFrame
+            
+            if _G.BringDestino == "Jugador" then
+                targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
+            elseif _G.BringDestino == "Fogata" then
+                local Campfire = workspace:FindFirstChild("Campfire") or workspace.Map:FindFirstChild("Campfire")
+                if Campfire and Campfire.PrimaryPart then
+                    targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)
+                end
+            elseif _G.BringDestino == "Máquina de Recursos" then
+                local Materials = workspace:FindFirstChild("Materials")
+                if Materials and Materials:FindFirstChild("CraftingBench") then
+                    targetCFrame = Materials.CraftingBench.CFrame
+                end
+            end
+            
+            if targetCFrame then
+                for _, item in pairs(workspace:GetDescendants()) do
+                    if item:IsA("Model") and item.PrimaryPart then
+                        item:PivotTo(targetCFrame)
+                    end
                 end
             end
         end
     })
 
-    -- Helper función para destino (local en tab)
-    local function getDestPos(HRP)
-        if _G.BringDest == "Player" then
-            return HRP.CFrame * CFrame.new(0, 0, -5)
-        elseif _G.BringDest == "Campfire" then
-            local Campfire = workspace:FindFirstChild("Campfire")
-            return Campfire.PrimaryPart.CFrame if Campfire and Campfire.PrimaryPart else HRP.CFrame
-        elseif _G.BringDest == "Resource Machine" then
-            local Materials = workspace:FindFirstChild("Materials")
-            if Materials and Materials:FindFirstChild("CraftingBench") then
-                return Materials.CraftingBench.CFrame
-            end
-            return HRP.CFrame
-        end
-        return HRP.CFrame
-    end
-
-    -- Buffer
-    for i = 1, 80 do local _ = "Logistics_Buffer_" .. i end
+    -- Buffer para Delta
+    for i = 1, 80 do local _ = "Logistics_Buffer_Line_" .. i end
 end
