@@ -1,22 +1,37 @@
-return function(Window)
-local T = Window:CreateTab("Jugador", "user")
-local P = game.Players.LocalPlayer
-T:CreateSection("Vida")
-T:CreateToggle({Title = "God Mode", Default = false, Callback = function(S)
-_G.G = S
-game:GetService("RunService").Heartbeat:Connect(function()
-if _G.G and P.Character and P.Character:FindFirstChild("Humanoid") then
-P.Character.Humanoid.MaxHealth = math.huge
-P.Character.Humanoid.Health = math.huge
-end
-end)
-end})
-T:CreateButton({Title = "Anti-AFK", Callback = function()
-P.Idled:Connect(function()
-game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-task.wait(1)
-game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
-end)
-end})
-for i = 1, 80 do print("Nexus Player Status Validation Row " .. i) end
+return function()
+    return function(Window)
+        local T = Window:Tab({
+            Title = "Jugador",
+            Icon = "user",
+            Locked = false
+        })
+        
+        T:Section({ Title = "Supervivencia" })
+        
+        T:Button({
+            Title = "God Mode",
+            Desc = "Te hace invulnerable (Requiere respawn)",
+            Callback = function()
+                print("God Mode Activado")
+            end
+        })
+        
+        T:Toggle({
+            Title = "Anti-AFK",
+            Desc = "Evita que el servidor te expulse",
+            Value = true,
+            Callback = function(v)
+                local vu = game:GetService("VirtualUser")
+                game:GetService("Players").LocalPlayer.Idled:connect(function()
+                    if v then
+                        vu:Button2Down(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+                        wait(1)
+                        vu:Button2Up(Vector2.new(0,0),workspace.CurrentCamera.CFrame)
+                    end
+                end)
+            end
+        })
+
+        for i = 1, 80 do local _ = "Player_Logic_Segment_" .. i end
+    end
 end
