@@ -1,4 +1,3 @@
--- Nexus Hub | Main Loader
 
 local Window = Load("Core/Windows.lua")
 
