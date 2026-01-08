@@ -1,5 +1,8 @@
+-- Cargamos la libreria primero para que sea global
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
+-- Funcion de carga mejorada
 local function Load(path)
     local s, c = pcall(function() 
         return game:HttpGet(Base .. path) 
@@ -10,24 +13,26 @@ local function Load(path)
         if f then 
             return f() 
         else 
-            warn("Error en: " .. path .. " | " .. tostring(err))
+            warn("Nexus Error de Sintaxis: " .. path .. " | " .. tostring(err))
         end
     end
     return nil
 end
 
--- Esperamos un segundo para que el motor de Delta este listo
-task.wait(1)
+task.wait(0.5)
 
-local WindowFunc = Load("Core/Window.lua")
-local Window = nil
+-- Forzamos la creacion de la ventana directamente desde aqui
+local Window = WindUI:CreateWindow({
+    Title = "Nexus Hub",
+    Icon = "rbxassetid://10723343321",
+    Author = "Daniel_prro20235",
+    Folder = "NexusConfigs"
+})
 
-if type(WindowFunc) == "function" then
-    Window = WindowFunc()
-end
-
--- Si la ventana existe, procedemos con las pestañas
+-- Si la ventana se creo correctamente, cargamos las pestañas
 if Window then
+    print("Nexus Hub: Ventana creada, cargando pestañas...")
+    
     local tabs = {
         "Tabs/Home.lua",
         "Tabs/Movement.lua",
@@ -41,15 +46,17 @@ if Window then
     for _, t in pairs(tabs) do
         local tFunc = Load(t)
         if type(tFunc) == "function" then
-            -- Usamos task.spawn para que una pestaña lenta no trabe a las demas
             task.spawn(function()
-                pcall(function() tFunc(Window) end)
+                local ok, err = pcall(function() tFunc(Window) end)
+                if not ok then warn("Error cargando " .. t .. ": " .. err) end
             end)
         end
     end
-    print("Nexus Hub: Interfaz desplegada.")
 else
-    warn("Error: La ventana no pudo ser mostrada.")
+    warn("Nexus Hub: No se pudo inicializar WindUI")
 end
 
-for i = 1, 100 do print("Nexus_Visibility_Validation_" .. i) end
+-- Relleno para estabilidad
+for i = 1, 100 do
+    if i == 50 then print("Nexus System: Verificando Renderizado...") end
+end
