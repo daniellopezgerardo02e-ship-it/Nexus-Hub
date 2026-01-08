@@ -1,19 +1,19 @@
-local base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
+-- Nexus Hub | Main Loader
+
+local BASE =
+"https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
 local function Load(path)
-    return loadstring(game:HttpGet(base .. path))()
+    return loadstring(game:HttpGet(BASE .. path))()
 end
 
-local WindUI = Load("core/windui.lua")
-local Bring  = Load("modules/bring.lua")
+local Window = Load("Core/Window.lua")
 
-local Window = WindUI:CreateWindow({
-    Title  = "Nexus Hub",
-    Icon   = "flame",
-    Author = "Daniel",
-    Folder = "NexusHub",
-})
+Load("Tabs/Home.lua")(Window)
+Load("Tabs/Movement.lua")(Window)
+Load("Tabs/World.lua")(Window)
+Load("Tabs/Player.lua")(Window)
+Load("Tabs/Utilities.lua")(Window)
+Load("Tabs/Settings.lua")(Window)
 
-Load("tabs/main.lua")(Window)
-Load("tabs/bring.lua")(Window, Bring) -- 👈 PASAMOS Bring
-Load("tabs/settings.lua")(Window)
+print("Nexus Hub cargado")
