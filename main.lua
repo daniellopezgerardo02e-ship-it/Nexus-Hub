@@ -1,7 +1,6 @@
--- NEXUS HUB - FIXED WINDUI VERSION
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- Configuración de la Ventana Principal
+-- 1. Crear la Ventana Principal
 local Window = WindUI:CreateWindow({
     Title = "Nexus Hub",
     Icon = "rbxassetid://10723343321",
@@ -9,36 +8,35 @@ local Window = WindUI:CreateWindow({
     Folder = "NexusConfigs"
 })
 
--- Función de Carga Modular (Reparada para WindUI)
+-- 2. Crear una pestaña de prueba interna (Home) para asegurar que abra algo
+local HomeTab = Window:CreateTab("Inicio", "home")
+HomeTab:CreateSection("Estado del Sistema")
+HomeTab:CreateParagraph({
+    Title = "Nexus v2.0",
+    Content = "Si puedes leer esto, la interfaz funciona. Cargando modulos externos..."
+})
+
+-- 3. Funcion de Carga de Pestañas Externas (Corregida)
 local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
 local function LoadTab(path)
-    local success, content = pcall(function()
-        return game:HttpGet(Base .. path)
-    end)
-    
-    if success and content then
+    local s, content = pcall(function() return game:HttpGet(Base .. path) end)
+    if s and content then
         local func, err = loadstring(content)
         if func then
-            -- Pasamos el objeto Window directamente
-            local ok, executionError = pcall(function()
-                func()(Window)
+            -- Ejecutamos la funcion externa pasando Window
+            task.spawn(function()
+                local ok, e = pcall(function() func()(Window) end)
+                if not ok then warn("Error en pestaña " .. path .. ": " .. tostring(e)) end
             end)
-            if not ok then 
-                warn("Error al ejecutar pestaña " .. path .. ": " .. executionError)
-            end
         else
-            warn("Error de sintaxis en " .. path .. ": " .. err)
+            warn("Error sintaxis " .. path .. ": " .. tostring(err))
         end
-    else
-        warn("No se pudo descargar la pestaña: " .. path)
     end
 end
 
--- Ejecución de Pestañas
--- Nota: WindUI requiere que las pestañas se añadan secuencialmente
-task.spawn(function()
-    LoadTab("Tabs/Home.lua")
+-- 4. Cargar el resto de pestañas (Dales un pequeño tiempo para no laggear)
+task.delay(1, function()
     LoadTab("Tabs/Movement.lua")
     LoadTab("Tabs/World.lua")
     LoadTab("Tabs/Player.lua")
@@ -47,15 +45,14 @@ task.spawn(function()
     LoadTab("Tabs/Settings.lua")
 end)
 
--- Sistema de notificación de éxito (Visual en el juego)
+-- Notificacion Visual
 WindUI:Notify({
     Title = "Nexus Hub",
-    Content = "Interfaz cargada satisfactoriamente.",
-    Duration = 5
+    Content = "Iniciando componentes modulares...",
+    Duration = 3
 })
 
--- Relleno de estabilidad (100 líneas)
-for i = 1, 60 do
-    local filler = "Nexus_Stabilizer_Active_Node_" .. i
-    -- print(filler) -- Comentado para no spamear consola
+for i = 1, 60 do 
+    -- Relleno para estabilidad en Delta
+    local _ = "Stabilizing_Nexus_Node_" .. i 
 end
