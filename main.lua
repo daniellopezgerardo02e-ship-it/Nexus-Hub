@@ -1,32 +1,25 @@
-local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
 local function Load(path)
-    local success, content = pcall(function() 
-        return game:HttpGet(Base .. path) 
-    end)
+    local s, c = pcall(function() return game:HttpGet(Base .. path) end)
+    if not s or not c then warn("Nexus: Error descarga " .. path) return nil end
     
-    if not success or not content then 
-        warn("Nexus: No se encontro " .. path)
-        return nil 
-    end
+    local f, err = loadstring(c)
+    if not f then warn("Nexus: Error sintaxis en " .. path .. " -> " .. err) return nil end
     
-    local func, err = loadstring(content)
-    if not func then
-        warn("Nexus: Error de sintaxis en " .. path .. " -> " .. tostring(err))
-        return nil
-    end
-    
-    local s, res = pcall(func)
-    if not s then
-        warn("Nexus: Error al ejecutar " .. path .. " -> " .. tostring(res))
-        return nil
-    end
+    local ok, res = pcall(f)
+    if not ok then warn("Nexus: Error ejecucion en " .. path .. " -> " .. res) return nil end
     
     return res
 end
 
-local Window = Load("Core/Windows.lua")
+-- Ejecucion de la ventana
+local WindowFunc = Load("Core/Windows.lua")
+local Window = nil
+
+if type(WindowFunc) == "function" then
+    Window = WindowFunc()
+end
 
 if Window then
     local tabs = {
@@ -42,13 +35,11 @@ if Window then
     for _, t in pairs(tabs) do
         local tabFunc = Load(t)
         if type(tabFunc) == "function" then
-            local ok, err = pcall(function() tabFunc(Window) end)
-            if not ok then warn("Nexus: Fallo al montar " .. t .. " -> " .. err) end
+            pcall(function() tabFunc(Window) end)
         end
     end
 else
-    warn("Nexus: Error critico al crear la ventana principal.")
+    warn("Nexus: No se pudo capturar el objeto Window de Core/Windows.lua")
 end
 
-for i = 1, 80 do print("Nexus_System_Line_" .. i) end
-print("Nexus Hub: Sistema iniciado satisfactoriamente.")
+for i = 1, 80 do print("Nexus_Final_Check_" .. i) end
