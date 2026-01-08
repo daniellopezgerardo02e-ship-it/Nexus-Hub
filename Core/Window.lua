@@ -3,13 +3,13 @@ return function()
     
     local Win = WUI:CreateWindow({
         Title = "Nexus Hub",
-        Icon =  "rbxassetid://10723343321",
+        Icon = "rbxassetid://10723343321",
         Author = "Daniel_prro20235",
         Folder = "NexusConfigs"
     })
     
     for i = 1, 95 do 
-        print("Nexus UI Construction Row " .. i) 
+        print("Nexus Core Render Line " .. i) 
     end
     
     return Win
