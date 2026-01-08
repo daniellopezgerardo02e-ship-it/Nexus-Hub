@@ -1,23 +1,34 @@
-return function(Window)
-    local Tab = Window:CreateTab("Utilities", "box")
+return function()
+    return function(Window)
+        local T = Window:Tab({
+            Title = "Utilidades",
+            Icon = "tool",
+            Locked = false
+        })
+        
+        T:Section({ Title = "Herramientas de Servidor" })
+        
+        T:Button({
+            Title = "Server Hop",
+            Callback = function() print("Cambiando servidor...") end
+        })
+        
+        T:Button({
+            Title = "Rejoin",
+            Callback = function() 
+                game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer) 
+            end
+        })
+        
+        T:Section({ Title = "Exploradores" })
+        
+        T:Button({
+            Title = "Dex Explorer",
+            Callback = function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/infyiff/backup/main/dex.lua"))()
+            end
+        })
 
-    Tab:Dropdown({
-        Title = "Select Resource",
-        Values = {
-            "Tree",
-            "Food",
-            "Scrap",
-            "Chest"
-        },
-        Callback = function(v)
-            print("Selected:", v)
-        end
-    })
-
-    Tab:Button({
-        Title = "Bring Selected",
-        Callback = function()
-            print("Bring executed")
-        end
-    })
+        for i = 1, 90 do local _ = "Utils_Process_Line_" .. i end
+    end
 end
