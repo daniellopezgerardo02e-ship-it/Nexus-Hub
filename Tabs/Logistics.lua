@@ -6,12 +6,17 @@ return function(Window)
     
     T:Section({ Title = "Configuración de Bring" })
     
-    -- Dropdown para elegir destino del bring
+    -- Dropdown corregido para destino (con Values y sin Multi)
     T:Dropdown({
         Title = "Destino del Bring",
-        Options = {"Jugador", "Fogata", "Máquina de Recursos"},
+        Desc = "Elige a dónde quieres que vayan los items",
+        Values = {
+            "Jugador",
+            "Fogata",
+            "Máquina de Recursos"
+        },
+        Value = "Jugador",  -- Valor por defecto
         Multi = false,
-        Default = "Jugador",
         Callback = function(selected)
             _G.BringDestino = selected
         end
@@ -27,10 +32,10 @@ return function(Window)
         end
     })
     
-    -- Dropdown avanzado con iconos para la lista de items
+    -- Dropdown MULTI avanzado para seleccionar varios items a la vez
     T:Dropdown({
-        Title = "Traer Item Específico",
-        Desc = "Selecciona un item para traer TODOS al destino actual",
+        Title = "Traer Items Específicos",
+        Desc = "Selecciona uno o varios items. Al cambiar la selección, se traen automáticamente al destino",
         Values = {
             {
                 Title = "Log",
@@ -57,8 +62,9 @@ return function(Window)
                 Icon = "gem"
             }
         },
-        Value = {Title = "Log", Icon = "tree-pine"},
-        Callback = function(option)
+        Value = {},  -- Empieza vacío
+        Multi = true,  -- ¡Permite seleccionar varios!
+        Callback = function(selectedOptions)
             local Char = game.Players.LocalPlayer.Character
             if not Char then return end
             local HRP = Char:FindFirstChild("HumanoidRootPart")
@@ -71,7 +77,7 @@ return function(Window)
             elseif _G.BringDestino == "Fogata" then
                 local Campfire = workspace:FindFirstChild("Campfire") or workspace.Map:FindFirstChild("Campfire")
                 if Campfire and Campfire.PrimaryPart then
-                    targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)  -- Perfecto para logs en fogata
+                    targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)  -- Perfecto para quemar logs
                 else
                     targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
                 end
@@ -84,9 +90,13 @@ return function(Window)
                 end
             end
             
-            if targetCFrame then
+            if not targetCFrame then return end
+            
+            -- Trae TODOS los items seleccionados
+            for _, option in pairs(selectedOptions) do
+                local itemName = option.Title
                 for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj.Name == option.Title then
+                    if obj.Name == itemName then
                         obj:PivotTo(targetCFrame)
                     end
                 end
@@ -98,7 +108,7 @@ return function(Window)
     
     T:Toggle({
         Title = "Auto Bring Activo",
-        Desc = "Trae automáticamente todos los items según destino",
+        Desc = "Trae automáticamente todos los items pequeños al destino",
         Value = false,
         Callback = function(v)
             _G.AutoBringActivo = v
@@ -146,7 +156,7 @@ return function(Window)
     
     T:Button({
         Title = "Traer TODO (Instant)",
-        Desc = "Trae absolutamente todos los items al destino actual (ignora modo)",
+        Desc = "Trae absolutamente todos los items al destino actual",
         Callback = function()
             local Char = game.Players.LocalPlayer.Character
             if not Char then return end
