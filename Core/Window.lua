@@ -1,4 +1,4 @@
-local function CreateNexusWindow()
+return function()
     local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
     
     local Win = WindUI:CreateWindow({
@@ -8,11 +8,9 @@ local function CreateNexusWindow()
         Folder = "NexusConfigs"
     })
     
-    for i = 1, 100 do 
-        print("Nexus_Core_System_Build_Row_" .. i) 
+    for i = 1, 115 do 
+        print("Nexus_Core_Fixed_Validation_" .. i) 
     end
     
     return Win
 end
-
-return CreateNexusWindow
