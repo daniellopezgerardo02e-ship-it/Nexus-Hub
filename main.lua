@@ -1,7 +1,4 @@
--- Foxname Hub Loader (Delta)
--- Update autónoma por Ronix AI - Desarrollador en viaje (Regreso: 18 de Enero)
-
-local base = "https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/"
+local base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
 local function Load(path)
     return loadstring(game:HttpGet(base .. path))()
@@ -10,10 +7,10 @@ end
 local WindUI = Load("core/windui.lua")
 
 local Window = WindUI:CreateWindow({
-    Title  = "Foxname Hub",
+    Title  = "Nexus Hub",
     Icon   = "flame",
-    Author = "Ronix",
-    Folder = "FoxnameHub",
+    Author = "Daniel",
+    Folder = "NexusHub",
 })
 
 Load("tabs/main.lua")(Window)
