@@ -5,6 +5,7 @@ local function Load(path)
 end
 
 local WindUI = Load("core/windui.lua")
+local Bring  = Load("modules/bring.lua")
 
 local Window = WindUI:CreateWindow({
     Title  = "Nexus Hub",
@@ -14,5 +15,5 @@ local Window = WindUI:CreateWindow({
 })
 
 Load("tabs/main.lua")(Window)
-Load("tabs/bring.lua")(Window)
+Load("tabs/bring.lua")(Window, Bring) -- 👈 PASAMOS Bring
 Load("tabs/settings.lua")(Window)
