@@ -4,23 +4,33 @@ return function(Window)
         Icon = "globe"
     })
     
-    T:Section({ Title = "Automatizacion de Granja" })
+    T:Section({ Title = "Automatización de Granja" })
     
     T:Toggle({
-        Title = "Auto Farm Arboles (Tree Aura)",
-        Desc = "Tala arboles automaticamente",
+        Title = "Tree Aura (Auto Tala)",
+        Desc = "Tala árboles solo si tienes hacha/motosierra equipada (rango 45)",
         Value = false,
         Callback = function(v)
-            _G.AutoFarm = v
+            _G.TreeAura = v
             task.spawn(function()
-                local HRP = game.Players.LocalPlayer.Character.HumanoidRootPart
-                while _G.AutoFarm do
-                    for _, tree in pairs(workspace:GetDescendants()) do
-                        if tree.Name == "Tree" or tree:HasTag("Tree") then
-                            local dist = (HRP.Position - tree.Position).Magnitude
-                            if dist < 45 then
-                                firetouchinterest(HRP, tree.PrimaryPart or tree, 0)
-                                firetouchinterest(HRP, tree.PrimaryPart or tree, 1)
+                while _G.TreeAura do
+                    local Char = game.Players.LocalPlayer.Character
+                    local HRP = Char:FindFirstChild("HumanoidRootPart")
+                    local Tool = Char:FindFirstChildOfClass("Tool")
+                    
+                    -- Detecta hacha/motosierra equipada
+                    if Tool and (string.find(Tool.Name:lower(), "axe") or string.find(Tool.Name:lower(), "chainsaw")) then
+                        for _, tree in pairs(workspace:GetDescendants()) do
+                            if tree.Name == "Tree" or tree:HasTag("Tree") or tree.Name:find("Log") then
+                                local dist = (HRP.Position - (tree.PrimaryPart or tree).Position).Magnitude
+                                if dist < 45 then
+                                    firetouchinterest(HRP, tree.PrimaryPart or tree, 0)
+                                    firetouchinterest(HRP, tree.PrimaryPart or tree, 1)
+                                    -- Trae log a ti
+                                    if tree.PrimaryPart then
+                                        tree:PivotTo(HRP.CFrame * CFrame.new(0, 0, -5))
+                                    end
+                                end
                             end
                         end
                     end
@@ -34,16 +44,24 @@ return function(Window)
     
     T:Toggle({
         Title = "Full Bright",
-        Desc = "Elimina las sombras y la oscuridad",
+        Desc = "Elimina sombras y oscuridad",
         Value = false,
         Callback = function(v)
+            local Lighting = game:GetService("Lighting")
             if v then
-                game:GetService("Lighting").Ambient = Color3.fromRGB(255, 255, 255)
+                Lighting.Brightness = 3
+                Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+                Lighting.FogEnd = 100000
+                Lighting.GlobalShadows = false
             else
-                game:GetService("Lighting").Ambient = Color3.fromRGB(0, 0, 0)
+                Lighting.Brightness = 1
+                Lighting.Ambient = Color3.fromRGB(0, 0, 0)
+                Lighting.FogEnd = 100
+                Lighting.GlobalShadows = true
             end
         end
     })
 
-    for i = 1, 85 do local _ = "World_Sync_Row_" .. i end
+    -- Buffer para Delta
+    for i = 1, 85 do local _ = "World_Buffer_" .. i end
 end
