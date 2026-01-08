@@ -10,24 +10,23 @@ local function Load(path)
         if f then 
             return f() 
         else 
-            warn("Error de sintaxis en: " .. path .. " | " .. tostring(err))
+            warn("Error en: " .. path .. " | " .. tostring(err))
         end
-    else
-        warn("No se pudo cargar el archivo (Ruta incorrecta?): " .. path)
     end
     return nil
 end
 
--- CARGA DEL ARCHIVO CORRECTO (Window.lua sin S)
+-- Esperamos un segundo para que el motor de Delta este listo
+task.wait(1)
+
 local WindowFunc = Load("Core/Window.lua")
 local Window = nil
 
 if type(WindowFunc) == "function" then
     Window = WindowFunc()
-else
-    warn("Error: Core/Window.lua no retorno una funcion")
 end
 
+-- Si la ventana existe, procedemos con las pestañas
 if Window then
     local tabs = {
         "Tabs/Home.lua",
@@ -42,17 +41,15 @@ if Window then
     for _, t in pairs(tabs) do
         local tFunc = Load(t)
         if type(tFunc) == "function" then
-            pcall(function() 
-                tFunc(Window) 
+            -- Usamos task.spawn para que una pestaña lenta no trabe a las demas
+            task.spawn(function()
+                pcall(function() tFunc(Window) end)
             end)
         end
     end
-    
-    print("Nexus Hub: Sistema cargado correctamente con Window.lua")
+    print("Nexus Hub: Interfaz desplegada.")
 else
-    warn("Error critico: No se pudo crear la interfaz.")
+    warn("Error: La ventana no pudo ser mostrada.")
 end
 
-for i = 1, 100 do 
-    print("Nexus_Boot_Check_Line_" .. i) 
-end
+for i = 1, 100 do print("Nexus_Visibility_Validation_" .. i) end
