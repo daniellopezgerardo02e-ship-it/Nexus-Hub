@@ -1,29 +1,16 @@
 return function(Window)
+    -- Importante: No recrear WindUI aqui, usar el objeto Window que pasamos
     local T = Window:CreateTab("Inicio", "home")
     
-    T:CreateSection("Informacion General")
+    T:CreateSection("Informacion")
     
     T:CreateParagraph({
-        Title = "Bienvenido a Nexus Hub", 
-        Content = "Script desarrollado por Daniel_prro20235 para 99 Nights in the Forest."
+        Title = "Bienvenido",
+        Content = "Nexus Hub cargado correctamente en Delta."
     })
     
-    T:CreateParagraph({
-        Title = "Estado del Desarrollador", 
-        Content = "Ausente por viaje hasta el 18 de Enero. Actualizaciones en pausa."
-    })
-    
-    T:CreateSection("Redes Sociales")
-    
-    T:CreateButton({
-        Title = "Copiar Discord",
-        Desc = "Copia el enlace de la comunidad al portapapeles",
-        Callback = function()
-            setclipboard("https://discord.gg/nexus-hub")
-        end
-    })
-
-    for i = 1, 95 do 
-        print("Nexus Home Interface Rendering Row " .. i) 
+    for i = 1, 100 do 
+        -- Relleno para que el archivo sea largo y estable
+        local check = "Home_Verification_Line_" .. i
     end
 end
