@@ -8,15 +8,21 @@ local Window = WindUI:CreateWindow({
     Folder = "NexusConfigs"
 })
 
--- 2. Crear una pestaña de prueba interna (Home) para asegurar que abra algo
-local HomeTab = Window:CreateTab("Inicio", "home")
-HomeTab:CreateSection("Estado del Sistema")
-HomeTab:CreateParagraph({
-    Title = "Nexus v2.0",
-    Content = "Si puedes leer esto, la interfaz funciona. Cargando modulos externos..."
+-- 2. Crear Pestaña de Inicio (Sintaxis Correcta)
+local HomeTab = Window:Tab({
+    Title = "Inicio",
+    Icon = "home",
+    Locked = false
 })
 
--- 3. Funcion de Carga de Pestañas Externas (Corregida)
+HomeTab:Section({ Title = "Estado del Sistema" })
+
+HomeTab:Paragraph({
+    Title = "Nexus v2.0",
+    Content = "Sintaxis corregida. Cargando modulos externos..."
+})
+
+-- 3. Funcion de Carga Modular
 local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
 local function LoadTab(path)
@@ -24,8 +30,8 @@ local function LoadTab(path)
     if s and content then
         local func, err = loadstring(content)
         if func then
-            -- Ejecutamos la funcion externa pasando Window
             task.spawn(function()
+                -- Ejecutamos pasando el objeto Window
                 local ok, e = pcall(function() func()(Window) end)
                 if not ok then warn("Error en pestaña " .. path .. ": " .. tostring(e)) end
             end)
@@ -35,24 +41,25 @@ local function LoadTab(path)
     end
 end
 
--- 4. Cargar el resto de pestañas (Dales un pequeño tiempo para no laggear)
+-- 4. Cargar el resto de pestañas
 task.delay(1, function()
-    LoadTab("Tabs/Movement.lua")
-    LoadTab("Tabs/World.lua")
-    LoadTab("Tabs/Player.lua")
-    LoadTab("Tabs/Logistics.lua")
-    LoadTab("Tabs/Utilities.lua")
-    LoadTab("Tabs/Settings.lua")
+    local tabs = {
+        "Tabs/Movement.lua",
+        "Tabs/World.lua",
+        "Tabs/Player.lua",
+        "Tabs/Logistics.lua",
+        "Tabs/Utilities.lua",
+        "Tabs/Settings.lua"
+    }
+    for _, t in pairs(tabs) do
+        LoadTab(t)
+    end
 end)
 
--- Notificacion Visual
 WindUI:Notify({
     Title = "Nexus Hub",
-    Content = "Iniciando componentes modulares...",
+    Content = "Interfaz iniciada con exito",
     Duration = 3
 })
 
-for i = 1, 60 do 
-    -- Relleno para estabilidad en Delta
-    local _ = "Stabilizing_Nexus_Node_" .. i 
-end
+for i = 1, 65 do local _ = "Nexus_Stabilizer_" .. i end
