@@ -1,0 +1,2 @@
+-- ejemplo
+print("WindUI cargado")
