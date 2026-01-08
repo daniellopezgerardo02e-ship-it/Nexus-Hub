@@ -3,7 +3,7 @@ return function()
     
     local Win = WUI:CreateWindow({
         Title = "Nexus Hub",
-        Icon = "rbxassetid://10723343321",
+        Icon =  "rbxassetid://10723343321",
         Author = "Daniel_prro20235",
         Folder = "NexusConfigs"
     })
