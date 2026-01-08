@@ -1,5 +1,5 @@
 
-local Window = Load("Core/Windows.lua")
+local Window = Load("Core/Window.lua")
 
 Load("Tabs/Home.lua")(Window)
 Load("Tabs/Movement.lua")(Window)
