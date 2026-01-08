@@ -1,6 +1,4 @@
-local Bring = require("modules.bring")
-
-return function(Window)
+return function(Window, Bring)
     local Tab = Window:Tab({
         Title = "Bring",
         Icon  = "box",
