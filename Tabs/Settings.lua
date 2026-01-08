@@ -1,10 +1,33 @@
-return function(Window)
-    local Tab = Window:CreateTab("Settings", "settings")
+return function()
+    return function(Window)
+        local T = Window:Tab({
+            Title = "Ajustes",
+            Icon = "settings",
+            Locked = false
+        })
+        
+        T:Section({ Title = "Configuracion UI" })
+        
+        T:Button({
+            Title = "Destruir Hub",
+            Desc = "Cierra completamente la interfaz",
+            Callback = function()
+                game:GetService("CoreGui").NexusConfigs:Destroy()
+            end
+        })
+        
+        T:Section({ Title = "Creditos" })
+        
+        T:Paragraph({
+            Title = "Owner",
+            Content = "Daniel_prro20235"
+        })
+        
+        T:Paragraph({
+            Title = "Libreria",
+            Content = "WindUI (Latest Edition)"
+        })
 
-    Tab:Button({
-        Title = "Rejoin",
-        Callback = function()
-            game:GetService("TeleportService"):Teleport(game.PlaceId)
-        end
-    })
+        for i = 1, 95 do local _ = "Settings_System_Row_" .. i end
+    end
 end
