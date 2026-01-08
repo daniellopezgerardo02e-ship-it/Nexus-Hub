@@ -10,4 +10,4 @@ local Window = WindUI:CreateWindow({
     Theme = "Dark"
 })
 
-return Windows
+return Window
