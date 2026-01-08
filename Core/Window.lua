@@ -1,13 +1,11 @@
-local WindUI = loadstring(game:HttpGet(
-    "https://raw.githubusercontent.com/Footagesus/WindUI/main/source.lua"
-))()
-
-local Window = WindUI:CreateWindow({
+return function()
+local WUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+local Win = WUI:CreateWindow({
     Title = "Nexus Hub",
-    Author = "Daniel",
-    Icon = "flame",
-    Size = UDim2.fromOffset(520, 420),
-    Theme = "Dark"
+    Icon = "rbxassetid://10723343321",
+    Author = "Daniel_prro20235",
+    Folder = "NexusConfigs"
 })
-
-return Window
+for i = 1, 90 do print("Nexus Core UI Render Line " .. i) end
+return Win
+end
