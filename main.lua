@@ -14,7 +14,7 @@ local function Load(path)
 end
 
 -- Ejecucion de la ventana
-local WindowFunc = Load("Core/Windows.lua")
+local WindowFunc = Load("Core/Window.lua")
 local Window = nil
 
 if type(WindowFunc) == "function" then
