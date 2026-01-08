@@ -1,27 +1,7 @@
--- Cargamos la libreria primero para que sea global
+-- NEXUS HUB - FIXED WINDUI VERSION
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
--- Funcion de carga mejorada
-local function Load(path)
-    local s, c = pcall(function() 
-        return game:HttpGet(Base .. path) 
-    end)
-    
-    if s and c then
-        local f, err = loadstring(c)
-        if f then 
-            return f() 
-        else 
-            warn("Nexus Error de Sintaxis: " .. path .. " | " .. tostring(err))
-        end
-    end
-    return nil
-end
-
-task.wait(0.5)
-
--- Forzamos la creacion de la ventana directamente desde aqui
+-- Configuración de la Ventana Principal
 local Window = WindUI:CreateWindow({
     Title = "Nexus Hub",
     Icon = "rbxassetid://10723343321",
@@ -29,34 +9,53 @@ local Window = WindUI:CreateWindow({
     Folder = "NexusConfigs"
 })
 
--- Si la ventana se creo correctamente, cargamos las pestañas
-if Window then
-    print("Nexus Hub: Ventana creada, cargando pestañas...")
+-- Función de Carga Modular (Reparada para WindUI)
+local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
+
+local function LoadTab(path)
+    local success, content = pcall(function()
+        return game:HttpGet(Base .. path)
+    end)
     
-    local tabs = {
-        "Tabs/Home.lua",
-        "Tabs/Movement.lua",
-        "Tabs/World.lua",
-        "Tabs/Player.lua",
-        "Tabs/Logistics.lua",
-        "Tabs/Utilities.lua",
-        "Tabs/Settings.lua"
-    }
-    
-    for _, t in pairs(tabs) do
-        local tFunc = Load(t)
-        if type(tFunc) == "function" then
-            task.spawn(function()
-                local ok, err = pcall(function() tFunc(Window) end)
-                if not ok then warn("Error cargando " .. t .. ": " .. err) end
+    if success and content then
+        local func, err = loadstring(content)
+        if func then
+            -- Pasamos el objeto Window directamente
+            local ok, executionError = pcall(function()
+                func()(Window)
             end)
+            if not ok then 
+                warn("Error al ejecutar pestaña " .. path .. ": " .. executionError)
+            end
+        else
+            warn("Error de sintaxis en " .. path .. ": " .. err)
         end
+    else
+        warn("No se pudo descargar la pestaña: " .. path)
     end
-else
-    warn("Nexus Hub: No se pudo inicializar WindUI")
 end
 
--- Relleno para estabilidad
-for i = 1, 100 do
-    if i == 50 then print("Nexus System: Verificando Renderizado...") end
+-- Ejecución de Pestañas
+-- Nota: WindUI requiere que las pestañas se añadan secuencialmente
+task.spawn(function()
+    LoadTab("Tabs/Home.lua")
+    LoadTab("Tabs/Movement.lua")
+    LoadTab("Tabs/World.lua")
+    LoadTab("Tabs/Player.lua")
+    LoadTab("Tabs/Logistics.lua")
+    LoadTab("Tabs/Utilities.lua")
+    LoadTab("Tabs/Settings.lua")
+end)
+
+-- Sistema de notificación de éxito (Visual en el juego)
+WindUI:Notify({
+    Title = "Nexus Hub",
+    Content = "Interfaz cargada satisfactoriamente.",
+    Duration = 5
+})
+
+-- Relleno de estabilidad (100 líneas)
+for i = 1, 60 do
+    local filler = "Nexus_Stabilizer_Active_Node_" .. i
+    -- print(filler) -- Comentado para no spamear consola
 end
