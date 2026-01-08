@@ -1,9 +1,14 @@
--- Foxname Hub Template
+-- Foxname Hub Loader (Delta)
 -- Update autónoma por Ronix AI - Desarrollador en viaje (Regreso: 18 de Enero)
 
-local WindUI = require("core.windui")
+local base = "https://raw.githubusercontent.com/TU_USUARIO/TU_REPO/main/"
 
--- Crear ventana principal
+local function Load(path)
+    return loadstring(game:HttpGet(base .. path))()
+end
+
+local WindUI = Load("core/windui.lua")
+
 local Window = WindUI:CreateWindow({
     Title  = "Foxname Hub",
     Icon   = "flame",
@@ -11,7 +16,6 @@ local Window = WindUI:CreateWindow({
     Folder = "FoxnameHub",
 })
 
--- Cargar pestañas
-require("tabs.main")(Window)
-require("tabs.bring")(Window)
-require("tabs.settings")(Window)
+Load("tabs/main.lua")(Window)
+Load("tabs/bring.lua")(Window)
+Load("tabs/settings.lua")(Window)
