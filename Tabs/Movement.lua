@@ -1,42 +1,46 @@
-return function(Window)
-    local T = Window:CreateTab("Movimiento", "person-walking")
-    local P = game.Players.LocalPlayer
-    
-    T:CreateSection("Fisicas")
-    
-    T:CreateSlider({
-        Title = "Velocidad", 
-        Min = 16, 
-        Max = 300, 
-        Default = 16, 
-        Callback = function(v) 
-            if P.Character then 
-                P.Character.Humanoid.WalkSpeed = v 
-            end 
-        end
-    })
-    
-    T:CreateToggle({
-        Title = "Vuelo Nexus", 
-        Default = false, 
-        Callback = function(S)
-            _G.F = S
-            local C = P.Character
-            if S and C then
-                local B = Instance.new("BodyVelocity", C.HumanoidRootPart)
-                B.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-                task.spawn(function()
-                    while _G.F do
-                        B.Velocity = C.Humanoid.MoveDirection * 100
-                        task.wait()
-                    end
-                    if B then B:Destroy() end
-                end)
+return function()
+    return function(Window)
+        local T = Window:Tab({
+            Title = "Movimiento",
+            Icon = "wind",
+            Locked = false
+        })
+        
+        T:Section({ Title = "Mejoras de Personaje" })
+        
+        T:Slider({
+            Title = "Velocidad (WalkSpeed)",
+            Desc = "Ajusta tu velocidad de caminata",
+            Min = 16,
+            Max = 200,
+            Value = 16,
+            Callback = function(v)
+                game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
             end
-        end
-    })
-    
-    for i = 1, 75 do 
-        print("Nexus Movement Logic Row " .. i) 
+        })
+        
+        T:Slider({
+            Title = "Salto (JumpPower)",
+            Desc = "Ajusta tu fuerza de salto",
+            Min = 50,
+            Max = 300,
+            Value = 50,
+            Callback = function(v)
+                game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
+            end
+        })
+        
+        T:Section({ Title = "Habilidades Especiales" })
+        
+        T:Toggle({
+            Title = "Vuelo (Fly)",
+            Desc = "Te permite volar por el mapa",
+            Value = false,
+            Callback = function(v)
+                print("Fly State: " .. tostring(v))
+            end
+        })
+
+        for i = 1, 80 do local _ = "Movement_Buffer_Line_" .. i end
     end
 end
