@@ -8,19 +8,27 @@ local Window = WindUI:CreateWindow({
     Folder = "NexusConfigs"
 })
 
--- 2. Pestaña de Inicio (Directa para evitar que la UI salga vacia)
+-- 2. Pestaña de Inicio (Directa)
 local HomeTab = Window:Tab({
     Title = "Inicio",
     Icon = "home"
 })
 
-HomeTab:Section({ Title = "Bienvenido Daniel" })
+HomeTab:Section({ Title = "Bienvenida" })
+
 HomeTab:Paragraph({
-    Title = "Nexus v2.0",
-    Content = "Cargando modulos de forma segura... Por favor espera."
+    Title = "Nexus Hub v2.0",
+    Content = "Bienvenido Daniel. El sistema modular esta activo y optimizado para Delta."
 })
 
--- 3. Sistema de Carga Secuencial (Evita que la terminal se pegue)
+HomeTab:Section({ Title = "Estado del Viaje" })
+
+HomeTab:Paragraph({
+    Title = "Desarrollador: Daniel_prro",
+    Content = "Estado: Viajando (Regreso el 18 de Enero)"
+})
+
+-- 3. Sistema de Carga Secuencial
 local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
 local function LoadTabSync(path)
@@ -43,15 +51,10 @@ local function LoadTabSync(path)
         return
     end
 
-    -- Si func() devolvió una función, intentamos dos patrones:
-    -- 1) init(Window)  -> si la función espera Window
-    -- 2) init() -> devuelve la función interior que espera Window
     if type(initOrErr) == "function" then
-        -- Intento 1: llamar con Window (caso más común)
         local ok1, res1 = pcall(initOrErr, Window)
         if ok1 then return end
 
-        -- Intento 2: llamar sin argumentos para obtener la función interior
         local ok2, inner = pcall(initOrErr)
         if ok2 and type(inner) == "function" then
             local ok3, res3 = pcall(inner, Window)
@@ -59,14 +62,13 @@ local function LoadTabSync(path)
             return
         end
 
-        -- Si llegamos aquí, mostramos el error del primer intento
         warn("Error en " .. path .. ": " .. tostring(res1))
     else
         warn("Módulo " .. path .. " no devolvió una función")
     end
 end
 
--- Lista de pestañas a cargar
+-- Lista de pestañas
 local tabs = {
     "Tabs/Movement.lua",
     "Tabs/World.lua",
@@ -76,11 +78,11 @@ local tabs = {
     "Tabs/Settings.lua"
 }
 
--- 4. Hilo de carga con pausas para Delta
+-- 4. Carga con pausas
 task.spawn(function()
     for _, tabPath in ipairs(tabs) do
         LoadTabSync(tabPath)
-        task.wait(0.2) -- Pausa crucial para que Delta no se congele
+        task.wait(0.2)
     end
     
     WindUI:Notify({
