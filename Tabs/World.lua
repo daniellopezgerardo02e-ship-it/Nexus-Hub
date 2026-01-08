@@ -1,43 +1,37 @@
-return function(Window)
-    local T = Window:CreateTab("Mundo", "globe")
-    local P = game.Players.LocalPlayer
-    
-    T:CreateSection("99 Noches")
-    
-    T:CreateToggle({
-        Title = "Aura Tala", 
-        Default = false, 
-        Callback = function(S)
-            _G.C = S
-            task.spawn(function()
-                while _G.C do
-                    local R = P.Character and P.Character:FindFirstChild("HumanoidRootPart")
-                    if R then
-                        for _, O in pairs(workspace:GetDescendants()) do
-                            if O.Name == "Tree" and O:IsA("Model") and (R.Position - O.PrimaryPart.Position).Magnitude < 45 then
-                                firetouchinterest(R, O.PrimaryPart, 0)
-                                task.wait(0.05)
-                                firetouchinterest(R, O.PrimaryPart, 1)
-                            end
-                        end
-                    end
-                    task.wait(0.5)
+return function()
+    return function(Window)
+        local T = Window:Tab({
+            Title = "Mundo",
+            Icon = "globe",
+            Locked = false
+        })
+        
+        T:Section({ Title = "Automatizacion de Granja" })
+        
+        T:Toggle({
+            Title = "Auto Farm Arboles",
+            Desc = "Tala arboles automaticamente",
+            Value = false,
+            Callback = function(v)
+                _G.AutoFarm = v
+            end
+        })
+        
+        T:Section({ Title = "Visuales" })
+        
+        T:Toggle({
+            Title = "Full Bright",
+            Desc = "Elimina las sombras y la oscuridad",
+            Value = false,
+            Callback = function(v)
+                if v then
+                    game:GetService("Lighting").Ambient = Color3.fromRGB(255, 255, 255)
+                else
+                    game:GetService("Lighting").Ambient = Color3.fromRGB(0, 0, 0)
                 end
-            end)
-        end
-    })
+            end
+        })
 
-    T:CreateToggle({
-        Title = "Brillo Full", 
-        Default = false, 
-        Callback = function(s)
-            game.Lighting.Brightness = s and 2 or 1
-            game.Lighting.GlobalShadows = not s
-            game.Lighting.ClockTime = s and 14 or 0
-        end
-    })
-    
-    for i = 1, 75 do 
-        print("Nexus World Logic Row " .. i) 
+        for i = 1, 85 do local _ = "World_Sync_Row_" .. i end
     end
 end
