@@ -27,13 +27,38 @@ return function(Window)
         end
     })
     
-    -- Dropdown para elegir qué item traer específicamente
+    -- Dropdown avanzado con iconos para la lista de items
     T:Dropdown({
         Title = "Traer Item Específico",
-        Options = {"Log", "Screw", "Nail", "Coin", "Flower", "Diamond"},
-        Multi = false,
-        Default = "Log",
-        Callback = function(selectedItem)
+        Desc = "Selecciona un item para traer TODOS al destino actual",
+        Values = {
+            {
+                Title = "Log",
+                Icon = "tree-pine"
+            },
+            {
+                Title = "Screw",
+                Icon = "screw"
+            },
+            {
+                Title = "Nail",
+                Icon = "hammer"
+            },
+            {
+                Title = "Coin",
+                Icon = "coins"
+            },
+            {
+                Title = "Flower",
+                Icon = "flower"
+            },
+            {
+                Title = "Diamond",
+                Icon = "gem"
+            }
+        },
+        Value = {Title = "Log", Icon = "tree-pine"},
+        Callback = function(option)
             local Char = game.Players.LocalPlayer.Character
             if not Char then return end
             local HRP = Char:FindFirstChild("HumanoidRootPart")
@@ -61,7 +86,7 @@ return function(Window)
             
             if targetCFrame then
                 for _, obj in pairs(workspace:GetDescendants()) do
-                    if obj.Name == selectedItem then
+                    if obj.Name == option.Title then
                         obj:PivotTo(targetCFrame)
                     end
                 end
