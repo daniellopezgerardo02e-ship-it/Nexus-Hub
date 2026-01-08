@@ -1,12 +1,5 @@
 -- Nexus Hub | Main Loader
 
-local BASE =
-"https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/main.lua"
-
-local function Load(path)
-    return loadstring(game:HttpGet(BASE .. path))()
-end
-
 local Window = Load("Core/Windows.lua")
 
 Load("Tabs/Home.lua")(Window)
