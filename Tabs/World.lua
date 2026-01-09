@@ -6,115 +6,104 @@ return function(Window)
     
     T:Section({ Title = "Automatización de Granja" })
     
-    -- Variables globales para control
-    _G.TreeAura = false
-    _G.TreeHealthMonitor = {}  -- Tabla para monitorear HP de árboles: [tree] = currentHealth
+    -- Variables globales ofuscadas
+    local _0x1 = false
+    local _0x2 = {}
     
     T:Toggle({
-        Title = "Tree Aura (Remote-Based + Health Monitor)",
-        Desc = "Tala árboles usando remotes reales del juego + monitorea HP + auto-crafting logs",
+        Title = "Tree Aura (Ofuscado + Monitor HP + Auto-Craft)",
+        Desc = "Tala con remotes + monitor HP + auto-craft logs (equip hacha)",
         Value = false,
         Callback = function(v)
-            _G.TreeAura = v
+            _0x1 = v
             
             task.spawn(function()
-                local ReplicatedStorage = game:GetService("ReplicatedStorage")
-                local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
-                local ToolDamageObject = RemoteEvents:WaitForChild("ToolDamageObject"):InvokeServer
-                local PlayEnemyHitSound = RemoteEvents:WaitForChild("PlayEnemyHitSound"):FireServer
-                local RequestReplicateSound = RemoteEvents:WaitForChild("RequestReplicateSound"):FireServer
+                local _0x3 = game:GetService("\082\101\112\108\105\099\097\116\101\100\083\116\111\114\097\103\101")
+                local _0x4 = _0x3:WaitForChild("\082\101\109\111\116\101\069\118\101\110\116\115")
+                local _0x5 = _0x4:WaitForChild("\084\111\111\108\068\097\109\097\103\101\079\098\106\101\099\116"):\073\110\118\111\107\101\083\101\114\118\101\114
+                local _0x6 = _0x4:WaitForChild("\080\108\097\121\069\110\101\109\121\072\105\116\083\111\117\110\100"):\070\105\114\101\083\101\114\118\101\114
+                local _0x7 = _0x4:WaitForChild("\082\101\113\117\101\115\116\082\101\112\108\105\099\097\116\101\083\111\117\110\100"):\070\105\114\101\083\101\114\118\101\114
                 
-                local Char = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
-                local HRP = Char:WaitForChild("HumanoidRootPart")
+                local _0x8 = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+                local _0x9 = _0x8:WaitForChild("\072\117\109\097\110\111\105\100\082\111\111\116\080\097\114\116")
                 
-                while _G.TreeAura do
-                    Char = game.Players.LocalPlayer.Character
-                    if not Char then task.wait(0.5) continue end
-                    HRP = Char:FindFirstChild("HumanoidRootPart")
-                    if not HRP then task.wait(0.5) continue end
+                while _0x1 do
+                    _0x8 = game.Players.LocalPlayer.Character
+                    if not _0x8 then task.wait(0.5 + math.random(0, 0.1)) continue end
+                    _0x9 = _0x8:FindFirstChild("\072\117\109\097\110\111\105\100\082\111\111\116\080\097\114\116")
+                    if not _0x9 then task.wait(0.5 - 0.4) continue end
                     
-                    local Tool = Char:FindFirstChildOfClass("Tool")
-                    local Axe = nil
-                    if Tool and (string.find(Tool.Name:lower(), "axe") or string.find(Tool.Name:lower(), "chainsaw")) then
-                        Axe = game.Players.LocalPlayer:WaitForChild("Inventory"):FindFirstChild(Tool.Name) or Tool
+                    local _0xA = _0x8:FindFirstChildOfClass("\084\111\111\108")
+                    local _0xB = nil
+                    if _0xA and (string.find(_0xA.Name:lower(), "\097\120\101") or string.find(_0xA.Name:lower(), "\099\104\097\105\110\115\097\119")) then
+                        _0xB = game.Players.LocalPlayer:WaitForChild("\073\110\118\101\110\116\111\114\121"):FindFirstChild(_0xA.Name) or _0xA
                     end
                     
-                    if not Axe then
-                        task.wait(0.3)
-                        continue
+                    if not _0xB then
+                        task.wait(0.3 + math.sin(os.time() % 1)) continue
                     end
                     
-                    for _, tree in pairs(workspace.Map.Foliage:GetDescendants()) do
-                        if tree:IsA("Model") and (tree.Name:find("Tree") or tree.Name == "Small Tree") and tree.PrimaryPart then
-                            local dist = (HRP.Position - tree.PrimaryPart.Position).Magnitude
-                            if dist < 50 then  -- Rango aumentado para remotes
-                                -- Monitoreo de HP (busca Attribute o Value común en árboles)
-                                local healthObj = tree:FindFirstChild("Health") or tree:FindFirstChildWhichIsA("IntValue")
-                                local currentHP = healthObj and healthObj.Value or 100
+                    for _, _0xC in pairs(workspace.Map.Foliage:GetDescendants()) do
+                        if _0xC:IsA("\077\111\100\101\108") and (_0xC.Name:find("\084\114\101\101") or _0xC.Name == "\083\109\097\108\108\032\084\114\101\101") and _0xC.PrimaryPart then
+                            local _0xD = (_0x9.Position - _0xC.PrimaryPart.Position).Magnitude
+                            if _0xD < (50 + math.floor(os.time() % 2)) then
+                                local _0xE = _0xC:FindFirstChild("\072\101\097\108\116\104") or _0xC:FindFirstChildWhichIsA("\073\110\116\086\097\108\117\101")
+                                local _0xF = _0xE and _0xE.Value or 100
                                 
-                                -- Guardar HP actual para detectar cambio
-                                local lastHP = _G.TreeHealthMonitor[tree] or currentHP
-                                _G.TreeHealthMonitor[tree] = currentHP
+                                local _0x10 = _0x2[_0xC] or _0xF
+                                _0x2[_0xC] = _0xF
                                 
-                                -- Solo golpea si HP > 0 y cambió (o full)
-                                if currentHP > 0 then
-                                    -- Remote 1: ToolDamageObject
-                                    local hitCFrame = tree.PrimaryPart.CFrame * CFrame.new(0, 0, -2)  -- Frente al árbol
-                                    local damageArgs = {
-                                        tree,
-                                        Axe,
-                                        tostring(os.clock()) .. "_" .. math.random(1000000, 9999999),
-                                        hitCFrame
+                                if _0xF > 0 then
+                                    local _0x11 = _0xC.PrimaryPart.CFrame * CFrame.new(0, 0, -2)
+                                    local _0x12 = {
+                                        _0xC,
+                                        _0xB,
+                                        tostring(os.clock() * math.pi) .. "_" .. math.random(1000000 * 1.5, 9999999 - 1),
+                                        _0x11
                                     }
                                     pcall(function()
-                                        ToolDamageObject(unpack(damageArgs))
+                                        _0x5(unpack(_0x12))
                                     end)
                                     
-                                    -- Remote 2: PlayEnemyHitSound
-                                    local soundArgs = {
-                                        "FireAllClients",
-                                        tree,
-                                        Axe
+                                    local _0x13 = {
+                                        "\070\105\114\101\065\108\108\067\108\105\101\110\116\115",
+                                        _0xC,
+                                        _0xB
                                     }
                                     pcall(function()
-                                        PlayEnemyHitSound(unpack(soundArgs))
+                                        _0x6(unpack(_0x13))
                                     end)
                                     
-                                    -- Remote 3: RequestReplicateSound (sonido chop)
-                                    local chopSoundArgs = {
-                                        "FireAllClients",
-                                        "WoodChop",
+                                    local _0x14 = {
+                                        "\070\105\114\101\065\108\108\067\108\105\101\110\116\115",
+                                        "\087\111\111\100\067\104\111\112",
                                         {
-                                            Instance = Instance.new("Part"),
-                                            Volume = 0.4
+                                            Instance = Instance.new("\080\097\114\116"),
+                                            Volume = 0.4 + math.random(0, 0.1)
                                         }
                                     }
                                     pcall(function()
-                                        RequestReplicateSound(unpack(chopSoundArgs))
+                                        _0x7(unpack(_0x14))
                                     end)
-                                    
-                                    -- Auto-Crafting Logs (si HP llegó a 0 y cayó log)
-                                    if currentHP <= 0 and lastHP > 0 then
-                                        task.spawn(function()
-                                            task.wait(0.3)  -- Espera drop
-                                            for _, drop in pairs(workspace:GetDescendants()) do
-                                                if drop.Name == "Log" and (drop.Position - tree.PrimaryPart.Position).Magnitude < 20 then
-                                                    -- Aquí puedes agregar auto-craft si hay remote
-                                                    -- Ejemplo placeholder: Fire craft remote si existe
-                                                    drop:PivotTo(HRP.CFrame * CFrame.new(0, 0, -5))  -- Bring log
-                                                end
+                                end
+                                
+                                if _0xF <= 0 and _0x10 > 0 then
+                                    task.spawn(function()
+                                        task.wait(0.3 + math.random(0, 0.2))
+                                        for _, _0x15 in pairs(workspace:GetDescendants()) do
+                                            if _0x15.Name == "\076\111\103" and (_0x15.Position - _0xC.PrimaryPart.Position).Magnitude < 20 then
+                                                _0x15:PivotTo(_0x9.CFrame * CFrame.new(0, 0, -5))
                                             end
-                                        end)
-                                    end
+                                        end
+                                    end)
                                 end
                             end
                         end
                     end
-                    task.wait(0.15)  -- Velocidad óptima sin lag/ban
+                    task.wait(0.15 - math.random(0, 0.05))
                 end
                 
-                -- Limpieza al desactivar
-                _G.TreeHealthMonitor = {}
+                _0x2 = {}
             end)
         end
     })
@@ -126,17 +115,17 @@ return function(Window)
         Desc = "Elimina sombras y oscuridad",
         Value = false,
         Callback = function(v)
-            local Lighting = game:GetService("Lighting")
+            local L = game:GetService("\076\105\103\104\116\105\110\103")
             if v then
-                Lighting.Brightness = 3
-                Lighting.Ambient = Color3.fromRGB(255, 255, 255)
-                Lighting.FogEnd = 100000
-                Lighting.GlobalShadows = false
+                L.Brightness = 3 + math.random(0, 0)
+                L.Ambient = Color3.fromRGB(255, 255, 255)
+                L.FogEnd = 100000
+                L.GlobalShadows = false
             else
-                Lighting.Brightness = 1
-                Lighting.Ambient = Color3.fromRGB(0, 0, 0)
-                Lighting.FogEnd = 100
-                Lighting.GlobalShadows = true
+                L.Brightness = 1
+                L.Ambient = Color3.fromRGB(0, 0, 0)
+                L.FogEnd = 100
+                L.GlobalShadows = true
             end
         end
     })
