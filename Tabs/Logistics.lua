@@ -6,7 +6,6 @@ return function(Window)
     
     T:Section({ Title = "Configuración de Bring" })
     
-    -- Dropdown para elegir destino del bring
     T:Dropdown({
         Title = "Destino del Bring",
         Desc = "Elige a dónde quieres que vayan los items",
@@ -22,7 +21,6 @@ return function(Window)
         end
     })
     
-    -- Toggle para modo Fast vs Instant
     T:Toggle({
         Title = "Modo Fast (1x1)",
         Desc = "ON = trae uno por uno (anti-lag). OFF = Instant (todos de una)",
@@ -32,38 +30,18 @@ return function(Window)
         end
     })
     
-    -- Variable global para guardar los items seleccionados
     _G.SelectedBringItems = {}
     
-    -- Dropdown MULTI con iconos para seleccionar items
     T:Dropdown({
         Title = "Seleccionar Items para Bring",
         Desc = "Marca los items que quieres traer. La selección se guarda.",
         Values = {
-            {
-                Title = "Log",
-                Icon = "tree-pine"
-            },
-            {
-                Title = "Screw",
-                Icon = "screw"
-            },
-            {
-                Title = "Nail",
-                Icon = "hammer"
-            },
-            {
-                Title = "Coin",
-                Icon = "coins"
-            },
-            {
-                Title = "Flower",
-                Icon = "flower"
-            },
-            {
-                Title = "Diamond",
-                Icon = "gem"
-            }
+            {Title = "Log", Icon = "tree-pine"},
+            {Title = "Screw", Icon = "screw"},
+            {Title = "Nail", Icon = "hammer"},
+            {Title = "Coin", Icon = "coins"},
+            {Title = "Flower", Icon = "flower"},
+            {Title = "Diamond", Icon = "gem"}
         },
         Value = {},
         Multi = true,
@@ -72,27 +50,17 @@ return function(Window)
             for _, option in pairs(selectedOptions) do
                 table.insert(_G.SelectedBringItems, option.Title)
             end
-            
-            WindUI:Notify({
-                Title = "Items Seleccionados",
-                Content = #_G.SelectedBringItems .. " items listos para traer",
-                Duration = 2
-            })
+            WindUI:Notify({Title = "Items Seleccionados", Content = #_G.SelectedBringItems .. " items listos", Duration = 2})
         end
     })
     
-    -- BOTÓN PRINCIPAL: Trae los items seleccionados al destino
     T:Button({
         Title = "¡TRAER ITEMS SELECCIONADOS!",
         Desc = "Trae TODOS los items marcados al destino elegido",
         Color = Color3.fromHex("#00ff88"),
         Callback = function()
             if #_G.SelectedBringItems == 0 then
-                WindUI:Notify({
-                    Title = "Error",
-                    Content = "No has seleccionado ningún item",
-                    Duration = 3
-                })
+                WindUI:Notify({Title = "Error", Content = "No has seleccionado ningún item", Duration = 3})
                 return
             end
             
@@ -113,8 +81,7 @@ return function(Window)
                     targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
                 end
             elseif _G.BringDestino == "Máquina de Recursos" then
-                -- Posición fija de la máquina de craft (perfecta para que caigan los logs)
-                targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574)
+                targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574) * CFrame.new(0, -5, 0)  -- Offset abajo para que caigan
             end
             
             if not targetCFrame then return end
@@ -124,17 +91,11 @@ return function(Window)
             for _, itemName in pairs(_G.SelectedBringItems) do
                 for _, obj in pairs(workspace:GetDescendants()) do
                     if obj.Name == itemName then
-                        -- Especial para Logs: trae el "Main" (el que hace que se mueva/animación)
                         if itemName == "Log" then
                             local mainPart = obj:FindFirstChild("Main")
-                            if mainPart then
-                                mainPart:PivotTo(targetCFrame)
-                            end
-                            -- También trae el Cylinder si existe (parte visual)
+                            if mainPart then mainPart:PivotTo(targetCFrame) end
                             local cylinder = obj:FindFirstChild("Meshes/log_Cylinder")
-                            if cylinder then
-                                cylinder:PivotTo(targetCFrame)
-                            end
+                            if cylinder then cylinder:PivotTo(targetCFrame) end
                         else
                             obj:PivotTo(targetCFrame)
                         end
@@ -143,11 +104,7 @@ return function(Window)
                 end
             end
             
-            WindUI:Notify({
-                Title = "Bring Completado",
-                Content = "Traídos " .. totalTraidos .. " items al destino: " .. _G.BringDestino,
-                Duration = 4
-            })
+            WindUI:Notify({Title = "Bring Completado", Content = "Traídos " .. totalTraidos .. " items al destino: " .. _G.BringDestino, Duration = 4})
         end
     })
     
@@ -181,7 +138,7 @@ return function(Window)
                             targetCFrame = HRP.CFrame * CFrame.new(0, 0, -5)
                         end
                     elseif _G.BringDestino == "Máquina de Recursos" then
-                        targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574)
+                        targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574) * CFrame.new(0, -5, 0)
                     end
                     
                     for _, item in pairs(workspace:GetDescendants()) do
@@ -222,7 +179,7 @@ return function(Window)
                     targetCFrame = Campfire.PrimaryPart.CFrame * CFrame.new(0, 20, 0)
                 end
             elseif _G.BringDestino == "Máquina de Recursos" then
-                targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574)
+                targetCFrame = CFrame.new(22.242820739746094, 26.810789108276367, -2.1091952323913574) * CFrame.new(0, -5, 0)
             end
             
             if targetCFrame then
@@ -240,11 +197,7 @@ return function(Window)
                         total = total + 1
                     end
                 end
-                WindUI:Notify({
-                    Title = "Bring Total",
-                    Content = "Traídos " .. total .. " items",
-                    Duration = 4
-                })
+                WindUI:Notify({Title = "Bring Total", Content = "Traídos " .. total .. " items", Duration = 4})
             end
         end
     })
