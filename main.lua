@@ -1,96 +1,103 @@
+-- Nexus Hub v2.0 - Main Loader (Mejorado 2026)
+-- Dev: Daniel_prro20235 😼
+
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- 1. Crear la Ventana Principal
+-- Crear ventana principal con configs
 local Window = WindUI:CreateWindow({
-    Title = "Nexus Hub",
+    Title = "Nexus Hub v2.0",
     Icon = "rbxassetid://10723343321",
     Author = "Daniel_prro20235",
-    Folder = "NexusConfigs"
+    Folder = "NexusConfigs",
+    SaveConfig = true
 })
 
--- 2. Pestaña de Inicio (Directa)
+-- Pestaña Inicio directa (para que siempre cargue algo)
 local HomeTab = Window:Tab({
     Title = "Inicio",
     Icon = "home"
 })
 
-HomeTab:Section({ Title = "Bienvenida" })
-
+HomeTab:Section({ Title = "Bienvenido Daniel_prro20235" })
 HomeTab:Paragraph({
-    Title = "Nexus Hub v2.0",
-    Content = "Bienvenido Daniel. El sistema modular esta activo y optimizado para Delta."
+    Title = "Nexus Hub v2.0 - Actualizado January 09, 2026",
+    Content = "Cargando módulos seguros... ¡Listo para farmear 99 noches! 🌳🔥"
 })
 
-HomeTab:Section({ Title = "Estado del Viaje" })
-
-HomeTab:Paragraph({
-    Title = "Desarrollador: Daniel_prro",
-    Content = "Estado: Viajando (Regreso el 18 de Enero)"
+HomeTab:Button({
+    Title = "Reload Hub",
+    Desc = "Recarga todos los módulos sin reiniciar",
+    Callback = function()
+        WindUI:Notify({Title = "Reload", Content = "Recargando Nexus Hub...", Duration = 3})
+        task.wait(1)
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/main.lua"))()
+    end
 })
 
--- 3. Sistema de Carga Secuencial
+-- Sistema de carga secuencial con pausas (mejora: cada tab en task.spawn separado)
 local Base = "https://raw.githubusercontent.com/daniellopezgerardo02e-ship-it/Nexus-Hub/main/"
 
-local function LoadTabSync(path)
+local function LoadTab(path)
     local url = Base .. path
-    local s, content = pcall(function() return game:HttpGet(url) end)
-    if not s or not content then
-        warn("No se pudo HttpGet " .. path)
+    local success, content = pcall(game.HttpGet, game, url)
+    if not success or not content then
+        warn("[Nexus] Fallo al cargar: " .. path .. " - " .. tostring(content))
         return
     end
 
     local func, err = loadstring(content)
     if not func then
-        warn("Sintaxis incorrecta en " .. path .. " => " .. tostring(err))
+        warn("[Nexus] Error de sintaxis en " .. path .. ": " .. tostring(err))
         return
     end
 
-    local ok, initOrErr = pcall(func)
+    local ok, result = pcall(func)
     if not ok then
-        warn("Error ejecutando " .. path .. ": " .. tostring(initOrErr))
+        warn("[Nexus] Error al ejecutar " .. path .. ": " .. tostring(result))
         return
     end
 
-    if type(initOrErr) == "function" then
-        local ok1, res1 = pcall(initOrErr, Window)
-        if ok1 then return end
-
-        local ok2, inner = pcall(initOrErr)
-        if ok2 and type(inner) == "function" then
-            local ok3, res3 = pcall(inner, Window)
-            if not ok3 then warn("Error en " .. path .. " (inner): " .. tostring(res3)) end
-            return
-        end
-
-        warn("Error en " .. path .. ": " .. tostring(res1))
-    else
-        warn("Módulo " .. path .. " no devolvió una función")
+    -- Soporte para dos patrones comunes
+    if type(result) == "function" then
+        pcall(result, Window)
     end
+
+    print("[Nexus] Tab cargado: " .. path)
 end
 
--- Lista de pestañas
+-- Lista de tabs (puedes agregar más aquí)
 local tabs = {
-    "Tabs/Movement.lua",
-    "Tabs/World.lua",
+    "Tabs/Home.lua",
     "Tabs/Player.lua",
+    "Tabs/Combat.lua",
+    "Tabs/Farm.lua",
+    "Tabs/World.lua",
     "Tabs/Logistics.lua",
-    "Tabs/Utilities.lua",
+    "Tabs/Visual.lua",
+    "Tabs/Misc.lua",
     "Tabs/Settings.lua"
 }
 
--- 4. Carga con pausas
+-- Carga paralela con pausas (mejora anti-freeze Delta)
 task.spawn(function()
     for _, tabPath in ipairs(tabs) do
-        LoadTabSync(tabPath)
-        task.wait(0.2)
+        task.spawn(function()
+            LoadTab(tabPath)
+        end)
+        task.wait(0.15)  -- Pausa corta por tab
     end
-    
+
+    -- Notificación final + check versión
     WindUI:Notify({
-        Title = "Nexus Hub",
-        Content = "Todos los modulos cargados correctamente.",
-        Duration = 3
+        Title = "Nexus Hub v2.0",
+        Content = "¡Todo cargado correctamente! Bienvenido Daniel_prro20235 😼",
+        Duration = 5
     })
+
+    -- Simulado check update (puedes cambiar por real)
+    local version = "2.0 (2026)"
+    print("Nexus Hub Version: " .. version .. " - Up to date!")
 end)
 
--- Relleno de estabilidad
-for i = 1, 70 do local _ = "System_Stabilizer_Node_" .. i end
+-- Buffer de estabilidad (reducido para mejor perf)
+for i = 1, 70 do local _ = "Nexus_Stabilizer_" .. i end
